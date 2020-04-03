@@ -8,7 +8,7 @@ var apiKey = 'AIzaSyA61clFhCrihwKKKsF8lz0SJ_jb32nhiXg';
 
 export default class GeoTimeline extends Component {
   state = {
-    patientId: '',
+    patientId: 'adrian',
     initialCenter: { lat: 43.6532, lng: -79.3832 },
     initialLat: 43.6532,
     initialLon: -79.3832,
