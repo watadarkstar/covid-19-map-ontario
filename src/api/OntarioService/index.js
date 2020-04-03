@@ -5,7 +5,7 @@ class OntarioService {
 
   // get
   getQueryUrl() {
-    return `/datastore_search?resource_id=${this.resourceId}`;
+    return `/datastore_search`;
   }
 
   // create

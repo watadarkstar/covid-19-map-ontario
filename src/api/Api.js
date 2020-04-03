@@ -12,7 +12,7 @@ export class Api {
     this.http = axios.create({
       baseURL: REACT_APP_BACKEND_API,
       timeout: TIMEOUT,
-      dataType: 'jsonp',
+      method: 'post',
     });
   }
 

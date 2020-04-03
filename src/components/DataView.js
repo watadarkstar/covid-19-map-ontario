@@ -1,5 +1,6 @@
 import React from 'react';
 import { Table } from 'antd';
+import moment from 'moment';
 
 import useOntarioData from '../hooks/useOntarioData';
 import 'antd/dist/antd.css';
@@ -32,16 +33,6 @@ const DataView = () => {
   //   });
   // };
 
-  // const dataSource = this.state.data.map((footprint, idx) => {
-  //   return {
-  //     key: idx,
-  //     case_id: footprint.case_id,
-  //     date: moment(footprint.date).format('ddd, ll'),
-  //     time: footprint.time,
-  //     latitude: footprint.latitude,
-  //     longitude: footprint.longitude,
-  //   };
-  // });
   const { data, error } = useOntarioData();
   const columns = [
     { title: 'case_id', dataIndex: 'case_id' },
@@ -52,11 +43,23 @@ const DataView = () => {
   ];
 
   console.log(data);
-  console.log(error);
+
+  const dataSource = data.features.map((footprint, idx) => {
+    const { properties } = footprint;
+    return {
+      key: idx,
+      case_id: properties._id,
+      date: moment(footprint.ACCURATE_EPISODE_DATE).format('ddd, ll'),
+      time: footprint.time,
+      latitude: properties.Reporting_PHU_Latitude,
+      longitude: properties.Reporting_PHU_Longitude,
+    };
+  });
+  // console.log(error);
 
   return (
     <Table
-      dataSource={[]}
+      dataSource={dataSource}
       columns={columns}
       pagination={true} // buttons on bottom of table that show which page number to jump to
       className="table-column"
