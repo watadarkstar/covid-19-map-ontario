@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Map, Marker, GoogleApiWrapper } from 'google-maps-react';
+import { GoogleApiWrapper } from 'google-maps-react';
+import ReactMapGL, { Marker } from 'react-map-gl';
 
 import { Table, Row, Col } from 'antd';
 import { DeleteFilled } from '@ant-design/icons';
@@ -30,6 +31,11 @@ const MapContainer = (props) => {
     showingInfoWindow: false,
     showModal: false,
     selectedPlace: {},
+  });
+  const [viewport, setViewport] = useState({
+    latitude: props.initialLat,
+    longitude: props.initialLon,
+    zoom: 8,
   });
   const { data, error } = useOntarioData();
 
@@ -91,12 +97,18 @@ const MapContainer = (props) => {
       return (
         <Marker
           key={index}
-          position={{
-            lat: properties.Reporting_PHU_Latitude,
-            lng: properties.Reporting_PHU_Longitude,
-          }}
+          latitude={properties.Reporting_PHU_Latitude}
+          longitude={properties.Reporting_PHU_Longitude}
+          offsetLeft={-20}
+          offsetTop={-10}
           onClick={superMarkerClick}
-        />
+        >
+          <img
+            src="https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png"
+            height="20"
+            width="20"
+          />
+        </Marker>
       );
     });
   };
@@ -280,17 +292,19 @@ const MapContainer = (props) => {
     <div className="outer-wrap">
       <Row>
         <Col flex={3} id="map" className="map">
-          <Map
+          <ReactMapGL
+            mapboxApiAccessToken={
+              'pk.eyJ1Ijoid2F0YWRhcmtzdGFyIiwiYSI6ImNrOGttbDZlZTAxOWMzZG12dmNpdmlkMTAifQ.UUcN4FxG_5MPXsYkKLsutg'
+            }
             google={props.google}
-            initialCenter={{
-              lat: props.initialLat, //change this to be set based on location input on form prior to map
-              lng: props.initialLon,
-            }}
-            zoom={9}
+            {...viewport}
+            onViewportChange={(viewport) => setViewport(viewport)}
+            width={'100%'}
+            height={'100%'}
             onClick={onMapClick}
           >
             {displayFootprints()}
-          </Map>
+          </ReactMapGL>
 
           <DateTimePickerModal
             visible={state.showModal || state.showingInfoWindow}
