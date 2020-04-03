@@ -195,7 +195,7 @@ export class MapContainer extends Component {
   toggleInfoTable() {
     var objData = document.getElementById('data');
     var objMap = document.getElementById('map');
-    if (objMap.style.display == '') {
+    if (objMap.style.display === '') {
       objData.style.display = 'block';
       objMap.style.display = 'none';
     } else {
