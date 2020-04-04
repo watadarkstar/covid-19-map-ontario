@@ -33,7 +33,7 @@ const DataView = () => {
   //   });
   // };
 
-  const { data, error } = useOntarioData();
+  const { data } = useOntarioData();
   const columns = [
     { title: 'case_id', dataIndex: 'case_id' },
     { title: 'date', dataIndex: 'date' },
@@ -41,8 +41,6 @@ const DataView = () => {
     { title: 'latitude', dataIndex: 'latitude' },
     { title: 'longitude', dataIndex: 'longitude' },
   ];
-
-  console.log(data);
 
   const dataSource = data.features.map((footprint, idx) => {
     const { properties } = footprint;
@@ -55,7 +53,6 @@ const DataView = () => {
       longitude: properties.Reporting_PHU_Longitude,
     };
   });
-  // console.log(error);
 
   return (
     <Table

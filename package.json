@@ -11,6 +11,7 @@
     "axios": "^0.19.2",
     "formik": "^2.1.4",
     "formik-antd": "^2.0.0",
+    "google-map-react": "^1.1.7",
     "google-maps-react": "^2.0.2",
     "moment": "^2.24.0",
     "react": "^16.13.0",
@@ -18,7 +19,9 @@
     "react-dom": "^16.13.0",
     "react-router": "^3.2.0",
     "react-scripts": "3.4.0",
+    "supercluster": "^7.0.0",
     "swr": "^0.2.0",
+    "use-supercluster": "^0.2.6",
     "uuid": "^7.0.3"
   },
   "scripts": {
