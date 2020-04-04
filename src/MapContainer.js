@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Map, Marker, GoogleApiWrapper } from 'google-maps-react';
+import GoogleMapReact from 'google-map-react';
+import useSupercluster from 'use-supercluster';
 
 import { Table, Row, Col } from 'antd';
 import { DeleteFilled } from '@ant-design/icons';
@@ -10,6 +11,8 @@ import DateTimePickerModal from './components/DateTimePickerModal';
 import useOntarioData from './hooks/useOntarioData';
 
 var apiKey = 'AIzaSyA61clFhCrihwKKKsF8lz0SJ_jb32nhiXg';
+
+const Marker = ({ children }) => children;
 
 const MapContainer = (props) => {
   const [state, setState] = useState({
@@ -31,7 +34,7 @@ const MapContainer = (props) => {
     showModal: false,
     selectedPlace: {},
   });
-  const { data, error } = useOntarioData();
+  const { data } = useOntarioData();
 
   // When user clicks on the map, a red marker shows up
   const onMapClick = (mapProps, map, clickEvent) => {
@@ -57,49 +60,47 @@ const MapContainer = (props) => {
   };
 
   // When user clicks on a red marker, an infobox pops up displaying the time for that marker
-  const superMarkerClick = (markerProps, marker, clickEvent) => {
-    const latitude = markerProps.position.lat;
-    const longitude = markerProps.position.lng;
+  // const superMarkerClick = (markerProps, marker, clickEvent) => {
+  //   const latitude = markerProps.position.lat;
+  //   const longitude = markerProps.position.lng;
 
-    // grab footPrint in state that matches with lat/lng position
-    const footPrint = data.features.filter((footprint) => {
-      return (
-        footprint.Reporting_PHU_Latitude === latitude &&
-        footprint.Reporting_PHU_Longitude === longitude
-      );
-    });
-    console.log('test', footPrint);
-    console.log('data', data);
-    if (!footPrint) {
-      console.log('notfound');
-      return;
-    }
+  //   // grab footPrint in state that matches with lat/lng position
+  //   const footPrint = data.features.filter((footprint) => {
+  //     return (
+  //       footprint.Reporting_PHU_Latitude === latitude &&
+  //       footprint.Reporting_PHU_Longitude === longitude
+  //     );
+  //   });
+  //   if (!footPrint) {
+  //     console.log('notfound');
+  //     return;
+  //   }
 
-    // update state with date/time and active marker
-    setState({
-      selectedPlace: markerProps,
-      activeMarker: marker,
-      showingInfoWindow: true,
-      activeDate: moment(footPrint.date),
-      activeTime: moment(footPrint.time),
-    });
-  };
+  //   // update state with date/time and active marker
+  //   setState({
+  //     selectedPlace: markerProps,
+  //     activeMarker: marker,
+  //     showingInfoWindow: true,
+  //     activeDate: moment(footPrint.date),
+  //     activeTime: moment(footPrint.time),
+  //   });
+  // };
 
-  const displayFootprints = () => {
-    return data.features.map((footprint, index) => {
-      const { properties } = footprint;
-      return (
-        <Marker
-          key={index}
-          position={{
-            lat: properties.Reporting_PHU_Latitude,
-            lng: properties.Reporting_PHU_Longitude,
-          }}
-          onClick={superMarkerClick}
-        />
-      );
-    });
-  };
+  // const displayFootprints = () => {
+  //   return data.features.map((footprint, index) => {
+  //     const { properties } = footprint;
+  //     return (
+  //       <Marker
+  //         key={index}
+  //         position={{
+  //           lat: properties.Reporting_PHU_Latitude,
+  //           lng: properties.Reporting_PHU_Longitude,
+  //         }}
+  //         onClick={superMarkerClick}
+  //       />
+  //     );
+  //   });
+  // };
 
   // When user clicks "save foot print" after inputing time data in modal
   const handleOk = () => {
@@ -207,38 +208,6 @@ const MapContainer = (props) => {
     }
   };
 
-  const postData = () => {
-    const footPrintWithCaseID = state.footPrints.map((obj) => {
-      let row = {};
-      row.case_id = props.patientId;
-      row.date = obj.date;
-      row.time = moment(obj.time).format('hh:mm:ss A');
-      row.latitude = obj.lat;
-      row.longitude = obj.lng;
-
-      return row;
-    });
-
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(footPrintWithCaseID),
-    };
-    console.log(JSON.stringify(footPrintWithCaseID));
-    fetch(
-      ' https://cn1aotmhx0.execute-api.us-east-1.amazonaws.com/default/savetimeline',
-      requestOptions,
-    )
-      .then((response) => {
-        response.json();
-        window.location.href = '/dataview';
-      })
-      //.then((json) => {alert(JSON.stringify(requestOptions)); window.location.reload(false)})
-      .catch((error) => {
-        console.error('Something went wrong:', error);
-      });
-  };
-
   const dataSource = data.features.map((footprint, idx) => {
     const { properties } = footprint;
     const formattedDate = moment(footprint.ACCURATE_EPISODE_DATE).format(
@@ -257,6 +226,39 @@ const MapContainer = (props) => {
     };
   });
 
+  // massage data
+  const clusterPoints = data.features.map((footprint) => {
+    const { properties } = footprint;
+
+    return {
+      type: 'Feature',
+      properties: {
+        cluster: false,
+        id: properties._id,
+        category: properties.Reporting_PHU_Postal_Code,
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          properties.Reporting_PHU_Longitude,
+          properties.Reporting_PHU_Latitude,
+        ],
+      },
+    };
+  });
+
+  // get map bounds
+  const [bounds, setBounds] = useState(null);
+  const [zoom, setZoom] = useState(10);
+
+  // get clusters
+  const { clusters } = useSupercluster({
+    points: clusterPoints,
+    bounds,
+    zoom,
+    options: { radius: 75, maxZoom: 20 },
+  });
+
   const columns = [
     { title: 'patient_id', dataIndex: 'patient_id' },
     { title: 'date', dataIndex: 'date' },
@@ -266,6 +268,7 @@ const MapContainer = (props) => {
     {
       title: '',
       render: (_, record) => (
+        // eslint-disable-next-line jsx-a11y/anchor-is-valid
         <a
           className="ant-typography ant-typography-danger"
           onClick={() => deleteByIndex(record.key)}
@@ -280,17 +283,70 @@ const MapContainer = (props) => {
     <div className="outer-wrap">
       <Row>
         <Col flex={3} id="map" className="map">
-          <Map
-            google={props.google}
-            initialCenter={{
-              lat: props.initialLat, //change this to be set based on location input on form prior to map
-              lng: props.initialLon,
-            }}
-            zoom={9}
+          <GoogleMapReact
+            bootstrapURLKeys={{ key: apiKey }}
+            defaultCenter={{ lat: props.initialLat, lng: props.initialLon }}
+            defaultZoom={9}
+            yesIWantToUseGoogleMapApiInternals
             onClick={onMapClick}
+            onChange={({ zoom, bounds }) => {
+              setZoom(zoom);
+              setBounds([
+                bounds.nw.lng,
+                bounds.se.lat,
+                bounds.se.lng,
+                bounds.nw.lat,
+              ]);
+            }}
           >
-            {displayFootprints()}
-          </Map>
+            {clusters.map((cluster) => {
+              const [longitude, latitude] = cluster.geometry.coordinates;
+              const {
+                cluster: isCluster,
+                point_count: pointCount,
+              } = cluster.properties;
+
+              let color = pointCount > 100 ? 'orange' : 'green';
+              color = pointCount > 300 ? 'red' : color;
+
+              if (isCluster) {
+                return (
+                  <Marker
+                    key={`cluster-${cluster.id}`}
+                    lat={latitude}
+                    lng={longitude}
+                  >
+                    <div
+                      className={`cluster-marker ${color}-marker`}
+                      style={{
+                        width: `${
+                          30 + (pointCount / clusterPoints.length) * 20
+                        }px`,
+                        height: `${
+                          30 + (pointCount / clusterPoints.length) * 20
+                        }px`,
+                      }}
+                      onClick={() => {}}
+                    >
+                      {pointCount}
+                    </div>
+                  </Marker>
+                );
+              }
+
+              return (
+                <Marker
+                  key={`footprint-${cluster.properties.id}`}
+                  lat={latitude}
+                  lng={longitude}
+                >
+                  <button className="crime-marker">
+                    <img src="/custody.svg" alt="crime doesn't pay" />
+                  </button>
+                </Marker>
+              );
+            })}
+          </GoogleMapReact>
 
           <DateTimePickerModal
             visible={state.showModal || state.showingInfoWindow}
@@ -306,6 +362,15 @@ const MapContainer = (props) => {
         </Col>
         <Col flex={2} id="data" className="data">
           {/* Table outside of map that shows info from state  */}
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            className="page-title"
+            href="https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario/resource/455fd63b-603d-4608-8216-7d8647f43350"
+          >
+            Confirmed positive cases of COVID-19 in Ontario
+          </a>
+          <p className="page-subtitle">Last updated April 4, 2020</p>
           <Table
             dataSource={dataSource}
             columns={columns}
@@ -313,15 +378,17 @@ const MapContainer = (props) => {
             className="table-column"
             size="small"
           />
-
           <CSVLink data={dataSource} className="download-csv">
             Save to CSV
           </CSVLink>
-          <div>
-            <button className="save-button" onClick={postData}>
-              Save and Exit
-            </button>
-          </div>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            className="data-link"
+            href="https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario/resource/455fd63b-603d-4608-8216-7d8647f43350"
+          >
+            Data provided by Ontario.ca
+          </a>
         </Col>
       </Row>
       <div className="burger">
@@ -331,6 +398,4 @@ const MapContainer = (props) => {
   );
 };
 
-export default GoogleApiWrapper({
-  apiKey: apiKey,
-})(MapContainer);
+export default MapContainer;

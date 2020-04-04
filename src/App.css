@@ -53,8 +53,7 @@
 }
 
 .download-csv {
-  top: 50px;
-  position: relative;
+  margin-top: 20;
 }
 
 .burger {
@@ -92,4 +91,54 @@
   flex-direction: column;
   justify-content: center;
   height: 100vh;
+}
+
+.data-link {
+  display: block;
+  font-size: 12px;
+  margin: 20px;
+}
+
+.page-title {
+  display: block;
+  font-weight: bold;
+  padding-top: 10px;
+  margin: 0;
+}
+
+.page-subtitle {
+  padding-bottom: 10px;
+  margin: 0;
+}
+
+.cluster-marker {
+  color: #fff;
+  background: #1978c8;
+  border-radius: 50%;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.red-marker {
+  background: #ff4500;
+}
+
+.green-marker {
+  background: green;
+}
+
+.orange-marker {
+  background: orange;
+}
+
+.crime-marker {
+  background: none;
+  border: none;
+}
+
+.crime-marker img {
+  width: 25px;
 }
