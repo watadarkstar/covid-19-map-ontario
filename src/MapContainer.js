@@ -235,6 +235,7 @@ const MapContainer = (props) => {
       properties: {
         cluster: false,
         id: properties._id,
+        category: properties.Reporting_PHU_Postal_Code,
       },
       geometry: {
         type: 'Point',

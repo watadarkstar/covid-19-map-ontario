@@ -43,7 +43,6 @@ export default class GeoTimeline extends Component {
             initialCenter: { lat: 43.6532, initialCenterLon: -79.3832 },
           });
         } else {
-          console.log(success.coords.latitude);
           this.setState({
             initialLat: success.coords.latitude,
             initialLon: success.coords.longitude,
